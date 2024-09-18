@@ -5,7 +5,6 @@ use sqlx::{mysql::MySqlPoolOptions, MySqlPool};
 mod handlers;
 
 pub static DB_POOL: OnceCell<MySqlPool> = OnceCell::new();
-
 pub fn get_db_pool() -> &'static MySqlPool {
     DB_POOL.get().unwrap()
 }
@@ -30,7 +29,7 @@ async fn main() {
         Router::new()
             .push(Router::with_path("/rs/team/<id>").get(handlers::team_handlers::get_user_team))
             .push(Router::new().path("/rs/admin").push(
-                Router::with_path("create_match").post(handlers::match_handlers::create_match),
+                Router::with_path("/create_match").post(handlers::match_handlers::create_match),
             ));
     let acceptor = TcpListener::new("127.0.0.1:7878").bind().await;
     Server::new(acceptor).serve(router).await;
