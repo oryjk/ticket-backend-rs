@@ -1,7 +1,7 @@
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use once_cell::sync::OnceCell;
 use salvo::prelude::*;
-use sqlx::{types::time::PrimitiveDateTime, MySqlPool};
+use sqlx::{types::time::PrimitiveDateTime};
 
 use crate::get_db_pool;
 
