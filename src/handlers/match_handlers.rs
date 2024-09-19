@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use salvo::prelude::*;
+use salvo::{http::HeaderValue, prelude::*, Request, Response};
 use uuid::Uuid;
 
 use crate::get_db_pool;
@@ -21,6 +21,12 @@ pub async fn create_match(req: &mut Request, res: &mut Response) {
     )
     .execute(pool)
     .await;
+
+    let unwrap_err = result.unwrap_err();
+    print!("{}", unwrap_err);
+
+    res.headers_mut()
+        .insert("Content-Type", HeaderValue::from_static("application/json"));
 }
 
 #[derive(serde::Deserialize)]
