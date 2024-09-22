@@ -75,4 +75,54 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn mode_test() {
+        let x = Some(10);
+        let y: Option<i8> = None;
+
+        if let Some(1000) = x {
+            println!("Yes!!!Input is 1000")
+        } else {
+            println!("No!!!Input is {:?}", x)
+        }
+        ////////////////////////////////////
+        let mut stack = Vec::new();
+        stack.push(1);
+        stack.push(2);
+        stack.push(3);
+        stack.push(1);
+        while let Some(num) = stack.pop() {
+            println!("{}", num)
+        }
+    }
+
+
+    trait Draw {
+        fn draw(&self);
+    }
+    struct Circle;
+    impl Draw for Circle {
+        fn draw(&self) {
+            println!("I am Circle")
+        }
+    }
+    struct Square;
+    impl Draw for Square {
+        fn draw(&self) {
+            println!("I am Square")
+        }
+    }
+
+    fn draw_shape(shape: &dyn Draw) {
+        shape.draw()
+    }
+
+    #[test]
+    fn draw_shape_test(){
+        let circle = Circle;
+        let square = Square;
+        draw_shape(&circle);
+        draw_shape(&square);
+    }
 }
