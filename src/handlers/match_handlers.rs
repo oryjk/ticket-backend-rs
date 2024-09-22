@@ -1,17 +1,38 @@
 use chrono::NaiveDateTime;
 use salvo::{http::HeaderValue, prelude::*, Request, Response};
 use sqlx::mysql::MySqlQueryResult;
-use sqlx::Error;
+use sqlx::{Error, Row};
 use uuid::Uuid;
 
 use crate::get_db_pool;
 
 #[handler]
 pub async fn create_match(req: &mut Request, res: &mut Response) {
+    let result = sqlx::query("select id from rs_activity where status=?")
+        .bind(1)
+        .fetch_all(get_db_pool()).await;
+
+    for item in &result.unwrap() {
+        let id: Result<i32, Error> = item.try_get(0);
+        update_status(&id.unwrap());
+    }
+
     let match_info_req: MatchInfoRequest = req.parse_json::<MatchInfoRequest>().await.unwrap();
+    println!("创建一个新的比赛");
     save_to_db(match_info_req).await;
     res.headers_mut()
         .insert("Content-Type", HeaderValue::from_static("application/json"));
+}
+
+async fn update_status(x: &i32) -> Result<(), Error> {
+    let query = "UPDATE rs_activity SET status = 2 WHERE id = $1";
+    let id = 1;
+    let result = sqlx::query(query)
+        .bind(&id)
+        .execute(get_db_pool())
+        .await?;
+    println!("将 id {} 为的比赛状态改为 {}", x, &id);
+    Ok(())
 }
 
 async fn save_to_db(match_info_req: MatchInfoRequest) -> Result<MySqlQueryResult, Error> {
@@ -119,7 +140,7 @@ mod tests {
     }
 
     #[test]
-    fn draw_shape_test(){
+    fn draw_shape_test() {
         let circle = Circle;
         let square = Square;
         draw_shape(&circle);
