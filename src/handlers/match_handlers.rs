@@ -1,9 +1,11 @@
 use chrono::NaiveDateTime;
 use salvo::{http::HeaderValue, prelude::*, Request, Response};
+use salvo::http::ParseError;
 use sqlx::mysql::MySqlQueryResult;
 use sqlx::{Error, Row};
 use uuid::Uuid;
-
+use std::env;
+use std::iter::Map;
 use crate::get_db_pool;
 
 #[handler]
@@ -16,8 +18,9 @@ pub async fn create_match(req: &mut Request, res: &mut Response) {
         let id: Result<String, Error> = item.try_get(0);
         update_status(&id.unwrap()).await;
     }
+    let mut match_info_req: MatchInfoRequest = req.parse_json::<MatchInfoRequest>().await.unwrap();
+    match_info_req.status=Some(1);
 
-    let match_info_req: MatchInfoRequest = req.parse_json::<MatchInfoRequest>().await.unwrap();
     println!("创建一个新的比赛");
     save_to_db(&match_info_req).await;
     res.headers_mut()
@@ -77,14 +80,28 @@ async fn save_to_db(match_info_req: &MatchInfoRequest) -> Result<MySqlQueryResul
 }
 
 #[derive(serde::Deserialize)]
+struct MatchInfoRequestTest {
+    name: String,
+    cover: Option<String>,
+    start_time: String,
+    end_time: String,
+    holding_date: String,
+    location: String,
+    status: Option<i8>,
+    color: Option<String>,
+    opposing: Option<String>,
+    opposing_color: Option<String>,
+}
+
+#[derive(serde::Deserialize)]
 struct MatchInfoRequest {
     name: String,
-    cover: String,
-    start_time: NaiveDateTime,
-    end_time: NaiveDateTime,
-    holding_date: NaiveDateTime,
+    cover: Option<String>,
+    start_time: String,
+    end_time: String,
+    holding_date: String,
     location: String,
-    status: i8,
+    status: Option<i8>,
     color: Option<String>,
     opposing: Option<String>,
     opposing_color: Option<String>,
@@ -102,15 +119,15 @@ mod tests {
 
         let result = save_to_db(&MatchInfoRequest {
             name: "".to_string(),
-            cover: "".to_string(),
+            cover: Some(String::from("cover")),
             start_time: Default::default(),
             end_time: Default::default(),
             holding_date: Default::default(),
             location: "".to_string(),
             status: 10i8,
-            color:Some(String::from("xxxx")),
-            opposing:Some(String::from("xxxx")),
-            opposing_color:Some(String::from("xxxx")),
+            color: Some(String::from("xxxx")),
+            opposing: Some(String::from("xxxx")),
+            opposing_color: Some(String::from("xxxx")),
         }).await;
         match result {
             Ok(_) => {
