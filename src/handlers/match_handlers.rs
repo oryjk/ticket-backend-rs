@@ -10,14 +10,14 @@ use crate::get_db_pool;
 
 #[handler]
 pub async fn create_match(req: &mut Request, res: &mut Response) {
-    let result = sqlx::query("select id from rs_activity where status=?")
-        .bind(1)
-        .fetch_all(get_db_pool()).await;
-
-    for item in &result.unwrap() {
-        let id: Result<String, Error> = item.try_get(0);
-        update_status(&id.unwrap()).await;
-    }
+    // let result = sqlx::query("select id from rs_activity where status=?")
+    //     .bind(1)
+    //     .fetch_all(get_db_pool()).await;
+    //
+    // for item in &result.unwrap() {
+    //     let id: Result<String, Error> = item.try_get(0);
+    //     update_status(&id.unwrap()).await;
+    // }
     let mut match_info_req: MatchInfoRequest = req.parse_json::<MatchInfoRequest>().await.unwrap();
     match_info_req.status=Some(1);
 
